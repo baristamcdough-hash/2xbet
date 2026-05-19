@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2xBet - Sports Betting Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Left Sidebar: Sports Categories Navigation -->
+        <aside class="sidebar-left">
+            <div class="sidebar-header">
+                <h1 class="logo">2xBet</h1>
+            </div>
+            
+            <nav class="sports-nav">
+                <h3 class="nav-section-title">Sports</h3>
+                <ul class="sports-list">
+                    <li><a href="#" class="nav-link active" data-sport="soccer">Soccer</a></li>
+                    <li><a href="#" class="nav-link" data-sport="basketball">Basketball</a></li>
+                    <li><a href="#" class="nav-link" data-sport="tennis">Tennis</a></li>
+                    <li><a href="#" class="nav-link" data-sport="american-football">American Football</a></li>
+                    <li><a href="#" class="nav-link" data-sport="ice-hockey">Ice Hockey</a></li>
+                </ul>
+            </nav>
+
+            <nav class="leagues-nav">
+                <h3 class="nav-section-title">Popular Leagues</h3>
+                <ul class="leagues-list">
+                    <li><a href="#" class="nav-link" data-league="premier-league">Premier League</a></li>
+                    <li><a href="#" class="nav-link" data-league="la-liga">La Liga</a></li>
+                    <li><a href="#" class="nav-link" data-league="champions-league">Champions League</a></li>
+                    <li><a href="#" class="nav-link" data-league="nba">NBA</a></li>
+                    <li><a href="#" class="nav-link" data-league="nfl">NFL</a></li>
+                </ul>
+            </nav>
+
+            <nav class="virtual-nav">
+                <h3 class="nav-section-title">Virtual Sports</h3>
+                <ul class="virtual-list">
+                    <li><a href="#" class="nav-link" data-virtual="virtual-soccer">Virtual Soccer</a></li>
+                    <li><a href="#" class="nav-link" data-virtual="virtual-horses">Virtual Horses</a></li>
+                    <li><a href="#" class="nav-link" data-virtual="virtual-dogs">Virtual Dogs</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="content-header">
+                <h2 class="content-title">Upcoming Matches</h2>
+                <div class="filter-controls">
+                    <button class="filter-btn" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="live">Live</button>
+                    <button class="filter-btn" data-filter="upcoming">Upcoming</button>
+                </div>
+            </header>
+
+            <div class="matches-container">
+                <!-- Match rows will be rendered here by JavaScript -->
+                <div id="matches-list" class="matches-list">
+                    <!-- Placeholder for dynamic match rendering -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar: Betslip and Ticker -->
+        <aside class="sidebar-right">
+            <!-- Live Winning Ticker -->
+            <section class="ticker-section">
+                <h3 class="ticker-title">🔥 Live Wins</h3>
+                <div id="ticker-feed" class="ticker-feed">
+                    <!-- Live ticker items will be rendered here by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Betslip -->
+            <section class="betslip-section">
+                <h3 class="betslip-title">Betslip</h3>
+                
+                <div id="betslip-selections" class="betslip-selections">
+                    <!-- Selected bets will be rendered here by JavaScript -->
+                </div>
+
+                <div class="betslip-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">Selections:</span>
+                        <span id="selection-count" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Potential Win:</span>
+                        <span id="potential-win" class="stat-value">0.00</span>
+                    </div>
+                    <div class="stat-row bonus-row">
+                        <span class="stat-label">Win Bonus:</span>
+                        <span id="win-bonus" class="stat-value bonus-value">0%</span>
+                    </div>
+                </div>
+
+                <div class="betslip-input">
+                    <label for="stake-input">Stake:</label>
+                    <input type="number" id="stake-input" placeholder="Enter amount" min="0" step="0.01">
+                </div>
+
+                <button id="submit-bet-btn" class="submit-bet-btn">Place Bet</button>
+                <button id="clear-slip-btn" class="clear-slip-btn">Clear Slip</button>
+            </section>
+        </aside>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
