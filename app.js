@@ -6,7 +6,7 @@
 // STATE MANAGEMENT
 // ===================================
 
-const API_BASE_URL = 'https://2xbet-api.onrender.com';
+const API_BASE_URL = 'https://twoxbet-j42a.onrender.com';
 
 async function apiCall(endpoint, options = {}) {
     const token = localStorage.getItem('access_token');
@@ -22,104 +22,40 @@ async function apiCall(endpoint, options = {}) {
 }
 
 const appState = {
-    // Current matches data
-    matches: [
-        {
-            id: 'match-001',
-            homeTeam: 'Manchester United',
-            awayTeam: 'Liverpool',
-            league: 'Premier League',
-            sport: 'soccer',
-            startTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
-            status: 'upcoming', // 'upcoming' or 'live'
-            homeScore: null,
-            awayScore: null,
+    // Fetch fixtures from live API
+async function fetchFixtures() {
+    console.log('[fetchFixtures] Loading from live API...');
+    
+    try {
+        const data = await apiCall('/api/fixtures?per_page=50');
+        
+        // Map API response to app state format
+        appState.matches = data.fixtures.map(fixture => ({
+            id: fixture.id.toString(),
+            homeTeam: fixture.home_team,
+            awayTeam: fixture.away_team,
+            league: fixture.league,
+            sport: fixture.sport,
+            startTime: new Date(fixture.scheduled_start),
+            status: fixture.status === 'live' ? 'live' : 'upcoming',
+            homeScore: fixture.home_score,
+            awayScore: fixture.away_score,
             odds: {
-                win1: 2.45,
-                draw: 3.20,
-                win2: 2.80
+                win1: parseFloat(fixture.odds_win_home),
+                draw: fixture.odds_draw ? parseFloat(fixture.odds_draw) : null,
+                win2: parseFloat(fixture.odds_win_away)
             }
-        },
-        {
-            id: 'match-002',
-            homeTeam: 'Barcelona',
-            awayTeam: 'Real Madrid',
-            league: 'La Liga',
-            sport: 'soccer',
-            startTime: new Date(Date.now() + 5 * 60 * 60 * 1000),
-            status: 'upcoming',
-            homeScore: null,
-            awayScore: null,
-            odds: {
-                win1: 2.15,
-                draw: 3.50,
-                win2: 3.40
-            }
-        },
-        {
-            id: 'match-003',
-            homeTeam: 'Lakers',
-            awayTeam: 'Celtics',
-            league: 'NBA',
-            sport: 'basketball',
-            startTime: new Date(Date.now() + 45 * 60 * 1000), // 45 minutes from now
-            status: 'live',
-            homeScore: 78,
-            awayScore: 82,
-            odds: {
-                win1: 1.95,
-                draw: null,
-                win2: 1.85
-            }
-        },
-        {
-            id: 'match-004',
-            homeTeam: 'Chelsea',
-            awayTeam: 'Arsenal',
-            league: 'Premier League',
-            sport: 'soccer',
-            startTime: new Date(Date.now() + 8 * 60 * 60 * 1000),
-            status: 'upcoming',
-            homeScore: null,
-            awayScore: null,
-            odds: {
-                win1: 2.30,
-                draw: 3.10,
-                win2: 3.15
-            }
-        },
-        {
-            id: 'match-005',
-            homeTeam: 'PSG',
-            awayTeam: 'Monaco',
-            league: 'Ligue 1',
-            sport: 'soccer',
-            startTime: new Date(Date.now() + 3.5 * 60 * 60 * 1000),
-            status: 'upcoming',
-            homeScore: null,
-            awayScore: null,
-            odds: {
-                win1: 1.65,
-                draw: 3.80,
-                win2: 5.50
-            }
-        },
-        {
-            id: 'match-006',
-            homeTeam: 'Warriors',
-            awayTeam: 'Nets',
-            league: 'NBA',
-            sport: 'basketball',
-            startTime: new Date(Date.now() + 6 * 60 * 60 * 1000),
-            status: 'upcoming',
-            homeScore: null,
-            awayScore: null,
-            odds: {
-                win1: 1.55,
-                draw: null,
-                win2: 2.35
-            }
-        }
+        }));
+        
+        console.log('[fetchFixtures] Loaded', appState.matches.length, 'fixtures');
+        renderMatches();
+    } catch (error) {
+        console.error('[fetchFixtures] Error:', error);
+        alert('Failed to load fixtures. Check console for details.');
+        // Fall back to mock data if API fails
+        renderMatches();
+    }
+}
     ],
 
     // Active betslip selections
@@ -459,49 +395,140 @@ function setNavLinkActive(element) {
 // BACKEND INTEGRATION PLACEHOLDERS
 // ===================================
 
-function addSelectionToSlip_BACKEND(matchId, pick) {
-    console.log(`[BACKEND HOOK] addSelectionToSlip - Match: ${matchId}, Pick: ${pick}`);
-    console.log('TODO: Connect to API endpoint: POST /api/betslip/add-selection');
-    console.log('Payload: { matchId, pick, timestamp }');
-}
+// ===================================
+// AUTHENTICATION & API INTEGRATION
+// ===================================
 
-function calculateWinBonus_BACKEND(selectionCount) {
-    console.log(`[BACKEND HOOK] calculateWinBonus - Selection Count: ${selectionCount}`);
-    console.log('TODO: Connect to API endpoint: GET /api/bonus/calculate');
-    console.log('Expected response: { bonusPercentage, bonusAmount }');
+async function registerUser(username, email, password) {
+    console.log('[auth] Registering user...');
     
-    // Current implementation uses local calculation
-    const bonus = calculateWinBonus(selectionCount);
-    console.log(`Calculated bonus locally: ${bonus}%`);
-    return bonus;
+    try {
+        const response = await apiCall('/api/auth/register', {
+            method: 'POST',
+            body: JSON.stringify({ username, email, password })
+        });
+        
+        console.log('[auth] Registration successful');
+        alert('Registration successful! Please login.');
+        return true;
+    } catch (error) {
+        console.error('[auth] Registration error:', error);
+        alert(`Registration failed: ${error.message}`);
+        return false;
+    }
 }
 
-function submitBetSlip_BACKEND() {
-    console.log('[BACKEND HOOK] submitBetSlip');
-    console.log('Payload: {');
-    console.log('  selections:', appState.betslipSelections);
-    console.log('  stake:', parseFloat(DOM.stakeInput.value) || 0);
-    console.log('  totalOdds:', appState.betslipSelections.reduce((acc, s) => acc * s.odds, 1));
-    console.log('  potentialWin:', parseFloat(DOM.potentialWin.textContent));
-    console.log('}');
-    console.log('TODO: Connect to API endpoint: POST /api/bets/submit');
-    console.log('Expected response: { betId, status, confirmation }');
+async function loginUser(email, password) {
+    console.log('[auth] Logging in...');
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Invalid email or password');
+        }
+        
+        const data = await response.json();
+        localStorage.setItem('access_token', data.access_token);
+        
+        console.log('[auth] Login successful');
+        await loadUserData();
+        return true;
+    } catch (error) {
+        console.error('[auth] Login error:', error);
+        alert(`Login failed: ${error.message}`);
+        return false;
+    }
 }
 
-function streamLiveUpdates_BACKEND() {
-    console.log('[BACKEND HOOK] streamLiveUpdates');
-    console.log('TODO: Set up WebSocket connection to: ws://api.2xbet.local/live-stream');
-    console.log('Expected events: { type, data }');
-    console.log('  - type: "match_update" -> score, status changes');
-    console.log('  - type: "ticker_update" -> new win notifications');
-    console.log('  - type: "odds_update" -> odds changes');
+async function logoutUser() {
+    console.log('[auth] Logging out...');
+    localStorage.removeItem('access_token');
+    alert('Logged out successfully');
+    location.reload();
 }
 
-function fetchMatches_BACKEND() {
-    console.log('[BACKEND HOOK] fetchMatches');
-    console.log('TODO: Replace mock data with API call: GET /api/matches');
-    console.log('Query params: { sport, league, filter, page, limit }');
-    console.log('Expected response: { matches: [...], total, page }');
+async function loadUserData() {
+    console.log('[auth] Loading user data...');
+    
+    try {
+        await loadUserWallet();
+        await fetchFixtures();
+    } catch (error) {
+        console.error('[auth] Failed to load user data:', error);
+    }
+}
+
+async function loadUserWallet() {
+    console.log('[wallet] Fetching balance...');
+    
+    try {
+        const wallet = await apiCall('/api/wallet/balance');
+        
+        console.log('Wallet:', wallet);
+        
+        // Update UI with wallet info
+        const balanceEl = document.getElementById('wallet-balance') || 
+                         document.createElement('div');
+        balanceEl.textContent = `Balance: $${wallet.balance}`;
+        
+        return wallet;
+    } catch (error) {
+        console.error('[wallet] Error:', error);
+        return null;
+    }
+}
+
+async function depositFunds(amount) {
+    console.log('[wallet] Deposit:', amount);
+    
+    try {
+        const response = await apiCall(`/api/wallet/deposit?amount=${amount}`, {
+            method: 'POST'
+        });
+        
+        console.log('[wallet] Deposit successful');
+        alert(`Deposited $${amount} successfully!`);
+        await loadUserWallet();
+    } catch (error) {
+        console.error('[wallet] Deposit error:', error);
+        alert(`Deposit failed: ${error.message}`);
+    }
+}
+
+async function withdrawFunds(amount) {
+    console.log('[wallet] Withdraw:', amount);
+    
+    try {
+        const response = await apiCall(`/api/wallet/withdraw?amount=${amount}`, {
+            method: 'POST'
+        });
+        
+        console.log('[wallet] Withdrawal successful');
+        alert(`Withdrew $${amount} successfully!`);
+        await loadUserWallet();
+    } catch (error) {
+        console.error('[wallet] Withdrawal error:', error);
+        alert(`Withdrawal failed: ${error.message}`);
+    }
+}
+
+async function loadTransactionHistory() {
+    console.log('[wallet] Loading transactions...');
+    
+    try {
+        const response = await apiCall('/api/wallet/transactions?page=1&per_page=20');
+        
+        console.log('[wallet] Transactions:', response.transactions);
+        return response.transactions;
+    } catch (error) {
+        console.error('[wallet] Error loading transactions:', error);
+        return [];
+    }
 }
 
 // ===================================
@@ -510,9 +537,23 @@ function fetchMatches_BACKEND() {
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('[DOMContentLoaded] Initializing 2xBet Dashboard');
-
-    // Render initial state
-    renderMatches();
+    
+    const token = localStorage.getItem('access_token');
+    
+    if (token) {
+        // User is logged in - load from API
+        console.log('[DOMContentLoaded] User logged in, loading from API...');
+        loadUserData();
+    } else {
+        // No login - show mock data or login prompt
+        console.log('[DOMContentLoaded] No user logged in, using mock data');
+        fetchFixtures().catch(() => {
+            console.log('[DOMContentLoaded] Falling back to mock data');
+            renderMatches();
+        });
+    }
+    
+    // Initialize UI
     renderBetslip();
     renderTicker();
 
@@ -523,14 +564,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Set 'All' as default active filter
     setFilterActive('all');
 
     // Navigation link listeners
     DOM.navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            console.log(`[Navigation] Clicked:`, e.target.textContent, e.target.dataset);
+            console.log(`[Navigation] Clicked:`, e.target.textContent);
             setNavLinkActive(e.target);
         });
     });
@@ -542,64 +582,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     DOM.submitBetBtn.addEventListener('click', () => {
         console.log('[UI Event] Submit Bet Button Clicked');
-        const stake = parseFloat(DOM.stakeInput.value);
-        if (isNaN(stake) || stake <= 0) {
-            console.warn('Invalid stake amount');
-            alert('Please enter a valid stake amount');
-            return;
-        }
-        if (appState.betslipSelections.length === 0) {
-            console.warn('No selections in betslip');
-            alert('Please select at least one bet');
-            return;
-        }
         submitBetSlip_BACKEND();
-        console.log('[UI Event] Bet submission ready for backend integration');
     });
 
     DOM.clearSlipBtn.addEventListener('click', () => {
         console.log('[UI Event] Clear Slip Button Clicked');
         clearBetslip();
     });
-
-    // Initialize backend integration hooks
-    console.log('\n========== BACKEND INTEGRATION READY ==========');
-    console.log('Call the following functions to connect to your backend:');
-    console.log('- fetchMatches_BACKEND()');
-    console.log('- streamLiveUpdates_BACKEND()');
-    console.log('- addSelectionToSlip_BACKEND(matchId, pick)');
-    console.log('- submitBetSlip_BACKEND()');
-    console.log('============================================\n');
+    
+    console.log('\n========== API INTEGRATION READY ==========');
+    console.log('Backend URL:', API_BASE_URL);
+    console.log('==========================================\n');
 });
-
-// Simulate live ticker updates
-setInterval(() => {
-    if (Math.random() > 0.7) { // 30% chance every 5 seconds
-        const usernames = ['BetKing', 'LuckyPunch', 'ProTrader', 'GreenGoblin', 'OddsWizard'];
-        const selections = ['Arsenal Win', 'Over 2.5', 'Draw + Over', 'Liverpool 1X2'];
-        
-        const newItem = {
-            id: `ticker-${Date.now()}`,
-            username: usernames[Math.floor(Math.random() * usernames.length)],
-            selection: selections[Math.floor(Math.random() * selections.length)],
-            odds: (Math.random() * 3 + 1.5).toFixed(2),
-            won: true,
-            timestamp: Date.now()
-        };
-
-        appState.tickerItems.unshift(newItem);
-        renderTicker();
-    }
-}, 5000);
-
-// Example: Simulate live match updates every 30 seconds
-setInterval(() => {
-    const liveMatches = appState.matches.filter(m => m.status === 'live');
-    if (liveMatches.length > 0) {
-        const randomLiveMatch = liveMatches[Math.floor(Math.random() * liveMatches.length)];
-        randomLiveMatch.homeScore = Math.max(0, randomLiveMatch.homeScore + (Math.random() > 0.8 ? 1 : 0));
-        randomLiveMatch.awayScore = Math.max(0, randomLiveMatch.awayScore + (Math.random() > 0.8 ? 1 : 0));
-        console.log(`[Live Update] ${randomLiveMatch.homeTeam} ${randomLiveMatch.homeScore} - ${randomLiveMatch.awayScore} ${randomLiveMatch.awayTeam}`);
-        renderMatches();
-    }
-}, 30000);
