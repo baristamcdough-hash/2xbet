@@ -20,6 +20,141 @@ async function apiCall(endpoint, options = {}) {
     if (!response.ok) throw new Error('API request failed');
     return response.json();
 }
+// ===================================
+// AUTH UI FUNCTIONS
+// ===================================
+
+const authModal = document.getElementById('auth-modal');
+const authBtn = document.getElementById('auth-btn');
+const logoutBtn = document.getElementById('logout-btn');
+const walletBtn = document.getElementById('wallet-btn');
+const closeBtn = document.querySelector('.close');
+
+// Modal controls
+authBtn.addEventListener('click', () => {
+    authModal.style.display = 'block';
+});
+
+closeBtn.addEventListener('click', () => {
+    authModal.style.display = 'none';
+});
+
+window.addEventListener('click', (e) => {
+    if (e.target === authModal) {
+        authModal.style.display = 'none';
+    }
+});
+
+// Tab switching
+document.querySelectorAll('.auth-tab').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+        const tabName = e.target.dataset.tab;
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+        e.target.classList.add('active');
+        document.getElementById(tabName + '-tab').classList.add('active');
+    });
+});
+
+// Login
+document.getElementById('login-submit').addEventListener('click', () => {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    
+    if (!email || !password) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    handleLogin(email, password);
+});
+
+// Register
+document.getElementById('register-submit').addEventListener('click', () => {
+    const username = document.getElementById('register-username').value;
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    
+    if (!username || !email || !password) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    handleRegister(username, email, password);
+});
+
+// Logout
+logoutBtn.addEventListener('click', () => {
+    handleLogout();
+});
+
+// Wallet
+walletBtn.addEventListener('click', () => {
+    loadUserWallet();
+});
+
+// Update UI based on auth state
+function updateAuthUI() {
+    const token = localStorage.getItem('access_token');
+    const userStatus = document.getElementById('user-status');
+    
+    if (token) {
+        authBtn.style.display = 'none';
+        walletBtn.style.display = 'block';
+        logoutBtn.style.display = 'block';
+        userStatus.textContent = '✓ Logged In';
+    } else {
+        authBtn.style.display = 'block';
+        walletBtn.style.display = 'none';
+        logoutBtn.style.display = 'none';
+        userStatus.textContent = '✗ Not logged in';
+    }
+}
+
+// Update login/register functions
+async function handleLogin(email, password) {
+    try {
+        const response = await apiCall('/api/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ email, password })
+        });
+        
+        localStorage.setItem('access_token', response.access_token);
+        alert('✓ Logged in successfully!');
+        authModal.style.display = 'none';
+        updateAuthUI();
+        await fetchFixturesFromAPI();
+        await loadUserWallet();
+    } catch (error) {
+        alert('✗ Login failed: ' + error.message);
+    }
+}
+
+async function handleRegister(username, email, password) {
+    try {
+        await apiCall('/api/auth/register', {
+            method: 'POST',
+            body: JSON.stringify({ username, email, password })
+        });
+        
+        alert('✓ Registration successful! Now login.');
+        document.getElementById('login-email').value = email;
+        document.getElementById('register-username').value = '';
+        document.getElementById('register-email').value = '';
+        document.getElementById('register-password').value = '';
+    } catch (error) {
+        alert('✗ Registration failed: ' + error.message);
+    }
+}
+
+function handleLogout() {
+    localStorage.removeItem('access_token');
+    updateAuthUI();
+    location.reload();
+}
+
+// Call on page load
+updateAuthUI();
 
 const appState = {
     // Fetch fixtures from live API
