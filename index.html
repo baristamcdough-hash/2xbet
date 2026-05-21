@@ -8,20 +8,32 @@
 </head>
 <body>
     <div class="dashboard-container">
+        <!-- Top Nav Bar -->
+        <nav class="top-nav">
+            <div class="nav-left">
+                <h1 class="logo">2xBet</h1>
+            </div>
+            <div class="nav-center">
+                <span id="user-status" class="user-status">Not logged in</span>
+            </div>
+            <div class="nav-right">
+                <button id="auth-btn" class="auth-btn">Login</button>
+                <button id="wallet-btn" class="wallet-btn" style="display:none;">💰 Balance</button>
+                <button id="logout-btn" class="logout-btn" style="display:none;">Logout</button>
+            </div>
+        </nav>
+
         <!-- Left Sidebar: Sports Categories Navigation -->
         <aside class="sidebar-left">
             <div class="sidebar-header">
-                <h1 class="logo">2xBet</h1>
+                <h3 class="nav-section-title">Sports</h3>
             </div>
             
             <nav class="sports-nav">
-                <h3 class="nav-section-title">Sports</h3>
                 <ul class="sports-list">
-                    <li><a href="#" class="nav-link active" data-sport="soccer">Soccer</a></li>
-                    <li><a href="#" class="nav-link" data-sport="basketball">Basketball</a></li>
-                    <li><a href="#" class="nav-link" data-sport="tennis">Tennis</a></li>
-                    <li><a href="#" class="nav-link" data-sport="american-football">American Football</a></li>
-                    <li><a href="#" class="nav-link" data-sport="ice-hockey">Ice Hockey</a></li>
+                    <li><a href="#" class="nav-link active" data-sport="soccer">⚽ Soccer</a></li>
+                    <li><a href="#" class="nav-link" data-sport="basketball">🏀 Basketball</a></li>
+                    <li><a href="#" class="nav-link" data-sport="tennis">🎾 Tennis</a></li>
                 </ul>
             </nav>
 
@@ -30,18 +42,7 @@
                 <ul class="leagues-list">
                     <li><a href="#" class="nav-link" data-league="premier-league">Premier League</a></li>
                     <li><a href="#" class="nav-link" data-league="la-liga">La Liga</a></li>
-                    <li><a href="#" class="nav-link" data-league="champions-league">Champions League</a></li>
                     <li><a href="#" class="nav-link" data-league="nba">NBA</a></li>
-                    <li><a href="#" class="nav-link" data-league="nfl">NFL</a></li>
-                </ul>
-            </nav>
-
-            <nav class="virtual-nav">
-                <h3 class="nav-section-title">Virtual Sports</h3>
-                <ul class="virtual-list">
-                    <li><a href="#" class="nav-link" data-virtual="virtual-soccer">Virtual Soccer</a></li>
-                    <li><a href="#" class="nav-link" data-virtual="virtual-horses">Virtual Horses</a></li>
-                    <li><a href="#" class="nav-link" data-virtual="virtual-dogs">Virtual Dogs</a></li>
                 </ul>
             </nav>
         </aside>
@@ -51,16 +52,15 @@
             <header class="content-header">
                 <h2 class="content-title">Upcoming Matches</h2>
                 <div class="filter-controls">
-                    <button class="filter-btn" data-filter="all">All</button>
+                    <button class="filter-btn active" data-filter="all">All</button>
                     <button class="filter-btn" data-filter="live">Live</button>
                     <button class="filter-btn" data-filter="upcoming">Upcoming</button>
                 </div>
             </header>
 
             <div class="matches-container">
-                <!-- Match rows will be rendered here by JavaScript -->
                 <div id="matches-list" class="matches-list">
-                    <!-- Placeholder for dynamic match rendering -->
+                    <div class="loading">Loading matches...</div>
                 </div>
             </div>
         </main>
@@ -71,7 +71,7 @@
             <section class="ticker-section">
                 <h3 class="ticker-title">🔥 Live Wins</h3>
                 <div id="ticker-feed" class="ticker-feed">
-                    <!-- Live ticker items will be rendered here by JavaScript -->
+                    <div class="ticker-item">Waiting for live wins...</div>
                 </div>
             </section>
 
@@ -80,7 +80,7 @@
                 <h3 class="betslip-title">Betslip</h3>
                 
                 <div id="betslip-selections" class="betslip-selections">
-                    <!-- Selected bets will be rendered here by JavaScript -->
+                    <div class="betslip-empty">No selections yet</div>
                 </div>
 
                 <div class="betslip-stats">
@@ -103,11 +103,40 @@
                     <input type="number" id="stake-input" placeholder="Enter amount" min="0" step="0.01">
                 </div>
 
-                <button id="submit-bet-btn" class="submit-bet-btn">Place Bet</button>
+                <button id="submit-bet-btn" class="submit-bet-btn" disabled>Place Bet</button>
                 <button id="clear-slip-btn" class="clear-slip-btn">Clear Slip</button>
             </section>
         </aside>
     </div>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Authentication</h2>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Login</button>
+                <button class="auth-tab" data-tab="register">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-tab" class="auth-form active">
+                <input type="email" id="login-email" placeholder="Email" class="auth-input">
+                <input type="password" id="login-password" placeholder="Password" class="auth-input">
+                <button id="login-submit" class="auth-submit">Login</button>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-tab" class="auth-form" style="display:none;">
+                <input type="text" id="register-username" placeholder="Username" class="auth-input">
+                <input type="email" id="register-email" placeholder="Email" class="auth-input">
+                <input type="password" id="register-password" placeholder="Password" class="auth-input">
+                <button id="register-submit" class="auth-submit">Register</button>
+            </div>
+        </div>
+    </div>
+
     <script src="config.js"></script>
     <script src="app.js"></script>
 </body>
