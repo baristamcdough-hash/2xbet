@@ -1,0 +1,25 @@
+databases:
+  - name: 2xbet-db
+    plan: free
+    databaseName: 2xbet
+    user: 2xbet_user
+
+services:
+  - type: web
+    name: 2xbet-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt && python init_db.py
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: 2xbet-db
+          property: connectionURI
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: "*"
+      - key: PYTHON_VERSION
+        value: "3.11.6"

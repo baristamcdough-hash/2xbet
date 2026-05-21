@@ -2,6 +2,7 @@
 2xBet Backend - FastAPI Application Entry Point
 """
 
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import create_tables
@@ -21,17 +22,19 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
 )
 
-# CORS middleware - allow frontend to communicate with backend
+# CORS middleware - environment-aware configuration
+# In production, set ALLOWED_ORIGINS as a comma-separated env variable
+# Example: ALLOWED_ORIGINS=https://2xbet.onrender.com,https://yourdomain.com
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
+if allowed_origins_env:
+    allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",")]
+else:
+    # Default: allow all origins (development and flexible production)
+    allowed_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5500",
-        "http://127.0.0.1:5500",
-        "http://localhost:8080",
-        "http://localhost:8000",
-        "*",  # Development only; restrict in production
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

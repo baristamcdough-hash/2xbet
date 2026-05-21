@@ -11,8 +11,11 @@ import os
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "sqlite:///./2xbet.db"  # Development: SQLite
-    # "postgresql://user:password@localhost:5432/2xbet"  # Production: PostgreSQL
 )
+
+# Render uses "postgres://" but SQLAlchemy 2.0+ requires "postgresql://"
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 # Create engine with appropriate pool settings
 if DATABASE_URL.startswith("sqlite"):
