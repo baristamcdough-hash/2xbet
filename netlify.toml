@@ -1,0 +1,10 @@
+[build]
+  command = "echo 'Deploying 2xBet frontend'"
+  publish = "."
+  base = "."
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  
